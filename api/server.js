@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 
 const PORT = process.env.PORT || 3000;
-const HOST_URL = process.env.RAILWAY_STATIC_URL || `http://localhost:${PORT}`;
+const HOST_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
 
 export const startServer = () => {
   const app = express();
