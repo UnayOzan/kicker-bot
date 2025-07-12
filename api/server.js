@@ -2,6 +2,9 @@
 import express from "express";
 import cors from "cors";
 
+const PORT = process.env.PORT || 3000;
+const HOST_URL = process.env.RAILWAY_STATIC_URL || `http://localhost:${PORT}`;
+
 export const startServer = () => {
   const app = express();
   const PORT = 3000;
@@ -18,6 +21,6 @@ export const startServer = () => {
   });
 
   app.listen(PORT, () => {
-    console.log(`🚀 Webhook server ayakta: http://localhost:${PORT}`);
+    console.log(`🚀 Webhook server ayakta: ${HOST_URL}`);
   });
 };
