@@ -1,32 +1,42 @@
-import WebSocket from "ws";
+import Pusher from "pusher-js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const channelId = process.env.KICK_CHANNEL_ID || "86901";
+const appKey = "32cbd69e4b950bf97679"; // Kick'in sabit Pusher app key'i
+const cluster = "us2";
 
 export const startListener = () => {
-  const ws = new WebSocket(
-    `wss://chat-server.kick.com/ws/v2?channel_id=${channelId}`
-  );
-
-  ws.on("open", () => {
-    console.log("✅ WebSocket bağlantısı kuruldu!");
+  const pusher = new Pusher(appKey, {
+    cluster,
+    wsHost: "ws-us2.pusher.com",
+    wsPort: 443,
+    forceTLS: true,
+    encrypted: true,
   });
 
-  ws.on("message", (data) => {
-    try {
-      const msg = JSON.parse(data);
-      if (msg.type === "message" && msg.content?.trim()) {
-        console.log(`💬 ${msg.sender.username}: ${msg.content}`);
-      }
-    } catch (err) {
-      console.error("❌ Veri parse hatası:", err.message);
+  const channelName = `chatrooms.${channelId}.v2`;
+  const channel = pusher.subscribe(channelName);
+
+  /*
+  channel.bind("new_message", (data) => {
+    const username = data?.sender?.username;
+    const content = data?.content;
+    if (username && content) {
+      console.log(`💬 ${username}: ${content}`);
     }
   });
 
-  ws.on("close", () => {
-    console.log("🔌 WebSocket bağlantısı kapandı.");
+  channel.bind("message_deleted", (data) => {
+    console.log(`❌ Mesaj silindi:`, data);
   });
 
-  ws.on("error", (err) => {
-    console.error("🚨 WebSocket Hatası:", err.message);
+  */
+
+  //Tüm event'leri görmek istersen:
+  channel.bind_global((event, data) => {
+    console.log(`📨 Event: ${event}`, data);
   });
+
+  console.log(`📡 Dinleniyor: ${channelName}`);
 };

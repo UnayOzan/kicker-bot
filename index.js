@@ -4,4 +4,4 @@ import { startListener } from "./api/listener.js";
 startServer();
 startListener();
 
-console.log("🚦 Tüm sistem başlatıldı.");
+console.log("Sistem başlatıldı.");
