@@ -5,7 +5,9 @@ const channelId = "86901";
 const webhookURL = "http://localhost:3000/kick-event";
 
 export const startListener = () => {
-  const ws = new WebSocket(`wss://chat.kick.com/${channelId}`);
+  const ws = new WebSocket(
+    `wss://chat-server.kick.com/ws/v2?channel_id=${channelId}`
+  );
 
   ws.on("open", () => {
     console.log("✅ WebSocket bağlantısı kuruldu!");

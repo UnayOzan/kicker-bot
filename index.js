@@ -2,6 +2,6 @@ import { startServer } from "./api/server.js";
 import { startListener } from "./api/listener.js";
 
 startServer();
-startListener();
+//startListener();
 
 console.log("🚦 Tüm sistem başlatıldı.");
