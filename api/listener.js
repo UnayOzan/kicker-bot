@@ -1,8 +1,6 @@
 import WebSocket from "ws";
-import axios from "axios";
 
-const channelId = "86901";
-const webhookURL = "http://localhost:3000/kick-event";
+const channelId = process.env.KICK_CHANNEL_ID || "86901";
 
 export const startListener = () => {
   const ws = new WebSocket(
@@ -16,27 +14,19 @@ export const startListener = () => {
   ws.on("message", (data) => {
     try {
       const msg = JSON.parse(data);
-      if (msg.type === "message") {
+      if (msg.type === "message" && msg.content?.trim()) {
         console.log(`💬 ${msg.sender.username}: ${msg.content}`);
-        axios.post(webhookURL, {
-          type: msg.type,
-          user: msg.sender.username,
-          content: msg.content,
-        });
-      } else if (msg.type === "systemMessage") {
-        console.log("🎉 Sistem Mesajı:", msg.message);
-        axios.post(webhookURL, {
-          type: msg.type,
-          message: msg.message,
-          raw: msg,
-        });
       }
     } catch (err) {
-      console.error("❌ Veri parse hatası:", err);
+      console.error("❌ Veri parse hatası:", err.message);
     }
   });
 
   ws.on("close", () => {
     console.log("🔌 WebSocket bağlantısı kapandı.");
+  });
+
+  ws.on("error", (err) => {
+    console.error("🚨 WebSocket Hatası:", err.message);
   });
 };

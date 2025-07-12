@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import cors from "cors";
 
@@ -13,7 +12,7 @@ export const startServer = () => {
   app.use(express.json());
 
   app.get("/", (req, res) => {
-    res.send("🚀 Kick Bot API Aktif!");
+    res.send("🚀 Kickable Bot API Aktif!");
   });
 
   app.post("/kick-event", (req, res) => {
