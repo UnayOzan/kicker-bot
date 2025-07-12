@@ -1,8 +1,6 @@
 import Pusher from "pusher-js";
-import dotenv from "dotenv";
-dotenv.config();
 
-const channelId = process.env.KICK_CHANNEL_ID || "86901";
+const channelId = "86901";
 const appKey = "32cbd69e4b950bf97679"; // Kick'in sabit Pusher app key'i
 const cluster = "us2";
 
