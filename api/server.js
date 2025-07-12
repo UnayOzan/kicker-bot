@@ -10,7 +10,7 @@ export const startServer = () => {
   const PORT = 3000;
 
   app.use(cors());
-  app.use(express.json()); // ✅ body-parser yerine bu
+  app.use(express.json());
 
   app.post("/kick-event", (req, res) => {
     const payload = req.body;
