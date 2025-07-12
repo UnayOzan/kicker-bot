@@ -16,7 +16,6 @@ export const startListener = () => {
   const channelName = `chatrooms.${channelId}.v2`;
   const channel = pusher.subscribe(channelName);
 
-  /*
   channel.bind("new_message", (data) => {
     const username = data?.sender?.username;
     const content = data?.content;
@@ -28,8 +27,6 @@ export const startListener = () => {
   channel.bind("message_deleted", (data) => {
     console.log(`❌ Mesaj silindi:`, data);
   });
-
-  */
 
   //Tüm event'leri görmek istersen:
   channel.bind_global((event, data) => {
