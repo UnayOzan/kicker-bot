@@ -5,10 +5,6 @@ import cors from "cors";
 const PORT = process.env.PORT || 3000;
 const HOST_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
 
-app.get("/", (req, res) => {
-  res.send("🚀 Kick Bot API Aktif!");
-});
-
 export const startServer = () => {
   const app = express();
   const PORT = 3000;
