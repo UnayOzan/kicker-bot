@@ -1,6 +1,6 @@
 import Pusher from "pusher-js";
 
-const channelId = "86901";
+const channelId = "85934";
 const appKey = "32cbd69e4b950bf97679"; // Kick'in sabit Pusher app key'i
 const cluster = "us2";
 
