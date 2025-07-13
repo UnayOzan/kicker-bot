@@ -28,6 +28,11 @@ export const startListener = () => {
     console.log(`❌ Mesaj silindi:`, data);
   });
 
+  channel.bind("reward-redeemed", (data) => {
+    console.log(`🎁 ${data.username} bir ödül kullandı: ${data.reward}`);
+    console.log(data);
+  });
+
   //Tüm event'leri görmek istersen:
   channel.bind_global((event, data) => {
     console.log(`📨 Event: ${event}`, data);
