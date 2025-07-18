@@ -1,9 +1,12 @@
+
+import { broadcast } from "../server.js";
+
 export const players = {};
 
 export const gameState = {
-  status: "Beklemede",  // Beklemede, Turda
-  turn: 0,
-  turnStartTimestamp: null,
+    status: "Beklemede",  // Beklemede, Turda
+    turn: 0,
+    turnStartTimestamp: null,
 };
 
 export const classes = {
@@ -50,12 +53,16 @@ export function startNextTurn() {
     }
 
     console.log(`🕒 Tur ${gameState.turn} başladı.`);
+
+    broadcast({ players, gameState });
 }
 
 export function endTurn() {
     gameState.status = "Beklemede";
     gameState.turnStartTimestamp = null;
     console.log(`🕒 Tur ${gameState.turn} sona erdi.`);
+
+    broadcast({ players, gameState });
 }
 
 // Komutları işleyen fonksiyon
@@ -78,6 +85,8 @@ export function handleAction(username, action) {
 
     player.lastAction = action;
     console.log(`✅ ${username} hamle yaptı: ${action}`);
+
+    broadcast({ players, gameState });
     return { success: true };
 }
 

@@ -4,6 +4,7 @@ import { players, gameState, startNextTurn, endTurn, handleAction } from "./game
 
 const PORT = process.env.PORT || 3000;
 const HOST_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
+const clients = [];
 
 export const startServer = () => {
   const app = express();
@@ -19,24 +20,22 @@ export const startServer = () => {
 
   //#region - game events
   app.get("/players-stream", (req, res) => {
+    clients.push(res);
+    console.log(`🟢 Bağlı gözlemciler: ${clients.length}`);
+
     res.set({
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
-      Connection: "keep-alive",
+      "Connection": "keep-alive",
     });
-
-    const sendData = () => {
-      res.write(`data: ${JSON.stringify({ players, gameState })}\n\n`);
-    };
-
-    sendData();
-
-    const interval = setInterval(sendData, 1000);
 
     req.on("close", () => {
-      clearInterval(interval);
+      clients.splice(clients.indexOf(res), 1);
+      console.log(`🔴 Bağlantı kapandı. Kalan: ${clients.length}`);
     });
   });
+
+
 
   app.post("/start-turn", (req, res) => {
     startNextTurn();
@@ -61,3 +60,10 @@ export const startServer = () => {
     console.log(`🚀 Webhook server ayakta: ${HOST_URL}`);
   });
 };
+
+export function broadcast(data) {
+  const json = `data: ${JSON.stringify(data)}\n\n`;
+  for (const client of clients) {
+    client.write(json);
+  }
+}
