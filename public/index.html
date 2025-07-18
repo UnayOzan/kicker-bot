@@ -1,68 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 
 <head>
-  <title>RPG Gözlemci Paneli</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #111;
-      color: #eee;
-    }
-
-    button {
-      margin: 5px;
-      padding: 10px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      margin: 5px 0;
-    }
-
-    .player {
-      margin-bottom: 8px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>🧙 RPG Gözlemci Paneli</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-  <h1>🧙 RPG Gözlemci Paneli</h1>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-4xl font-extrabold mb-6">🧙 RPG Gözlemci Paneli</h1>
 
-  <div>
-    <strong>Oyun Durumu:</strong> <span id="gameStatus"></span><br>
-    <strong>Tur:</strong> <span id="turnNumber"></span><br>
-    <strong>Tur Süresi:</strong> <span id="turnTimer"></span> saniye
+    <section class="mb-6 p-4 bg-gray-800 rounded shadow space-y-1">
+      <div><strong>Oyun Durumu:</strong> <span id="gameStatus" class="font-mono"></span></div>
+      <div><strong>Tur:</strong> <span id="turnNumber" class="font-mono"></span></div>
+      <div><strong>Tur Süresi:</strong> <span id="turnTimer" class="font-mono"></span> saniye</div>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-2xl font-semibold mb-3">Oyuncular ve Karşı Düşmanları</h2>
+      <ul id="playerList" class="space-y-4" style="min-height: 640px;">
+        <!-- Sadece oyuncu varsa slot görünür -->
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-3">Hamle Logu</h2>
+      <div id="log" class="bg-gray-800 p-4 h-48 overflow-y-auto font-mono rounded shadow"></div>
+    </section>
   </div>
-
-  <h3>Oyuncular</h3>
-  <ul id="playerList"></ul>
-
-  <h3>Hamle Logu</h3>
-  <div id="log" style="background:#222; padding:10px; height:150px; overflow:auto;"></div>
 
   <script>
     let turnStartTimestamp = null;
     const actionHistory = {};
 
+    const icons = {
+      hp: '<svg class="inline w-4 h-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 18.657l-6.828-6.829a4 4 0 010-5.656z"/></svg>',
+      atk: '<svg class="inline w-4 h-4 mr-1 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a1 1 0 011-1h3v2H6.414l7.293 7.293-1.414 1.414L4 4.414V3z"/></svg>',
+      def: '<svg class="inline w-4 h-4 mr-1 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v5a6 6 0 0012 0V8a6 6 0 00-6-6z"/></svg>',
+    };
+
     function renderPlayers(players) {
       const list = document.getElementById("playerList");
       list.innerHTML = "";
 
-      for (const [username, data] of Object.entries(players)) {
+      const usernames = Object.keys(players).slice(0, 8);
+
+      usernames.forEach((username) => {
+        const player = players[username];
+        const enemy = player.currentEnemy;
+
         const li = document.createElement("li");
-        li.className = "player";
-        li.innerHTML = `
-          <strong>${username}</strong> (${data.class})<br>
-          HP: ${data.stats.hp} | ATK: ${data.stats.atk} | DEF: ${data.stats.def}<br>
-          <em>Son Hamle:</em> ${data.lastAction}
+        li.className = "bg-gray-700 rounded shadow p-4 flex items-center justify-between";
+
+        // Player kısmı
+        const playerPart = document.createElement("div");
+        playerPart.className = "w-1/2 pr-4 border-r border-gray-600";
+        playerPart.innerHTML = `
+          <h3 class="text-lg font-semibold mb-1">${username}</h3>
+          <p class="italic text-sm text-gray-300 mb-2">(${player.class})</p>
+          <div class="text-sm space-y-1">
+            <div>${icons.hp} HP: <span class="font-mono">${player.stats.hp}</span></div>
+            <div>${icons.atk} ATK: <span class="font-mono">${player.stats.atk}</span></div>
+            <div>${icons.def} DEF: <span class="font-mono">${player.stats.def}</span></div>
+          </div>
+          <div class="mt-3 text-yellow-300 italic text-sm">
+            Son Hamle: ${player.lastAction}
+          </div>
         `;
+
+        // Enemy kısmı
+        const enemyPart = document.createElement("div");
+        enemyPart.className = "w-1/2 pl-4 flex flex-col items-center";
+
+        if (enemy) {
+          enemyPart.innerHTML = `
+            <div class="text-5xl select-none mb-1">${enemy.icon}</div>
+            <h4 class="font-mono text-lg">${enemy.name}</h4>
+            <div class="text-sm font-mono mt-1">
+              HP: ${enemy.hp} | ATK: ${enemy.atk} | DEF: ${enemy.def}
+            </div>
+          `;
+        } else {
+          enemyPart.innerHTML = `
+            <div class="text-gray-400 italic select-none text-center">
+              Düşman yok
+            </div>
+          `;
+        }
+
+        li.appendChild(playerPart);
+        li.appendChild(enemyPart);
         list.appendChild(li);
-      }
+      });
     }
 
     function updateLogWithNewActions(players) {
@@ -112,12 +142,15 @@
     fetchInitialData();
 
     const evtSource = new EventSource("/players-stream");
-
     evtSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       renderPlayers(data.players);
       updateGameState(data.gameState);
       updateLogWithNewActions(data.players);
+
+      if (data.systemMessage) {
+        addLog(data.systemMessage);
+      }
     };
 
     setInterval(updateTurnTimer, 1000);

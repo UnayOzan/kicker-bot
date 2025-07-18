@@ -23,7 +23,7 @@ export function startRPG() {
             console.log(msg);
             return;
         }
-
+        
         if (content.startsWith("!join ")) {
             const className = content.split(" ")[1];
             handleJoin(username, className);
