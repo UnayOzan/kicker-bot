@@ -1,11 +1,11 @@
 import Pusher from "pusher-js";
-import { eventBus } from "./misc/eventBus";
+import { eventBus, eventAlias } from "./misc/eventBus.js";
 
 const channelId = "55150469";
-const appKey = "32cbd69e4b950bf97679"; // Kick'in sabit Pusher app key'i
+const appKey = "32cbd69e4b950bf97679";
 const cluster = "us2";
 
-export const startListener = () => {
+export const startListener = (onConnected) => {
   const pusher = new Pusher(appKey, {
     cluster,
     wsHost: "ws-us2.pusher.com",
@@ -14,14 +14,25 @@ export const startListener = () => {
     encrypted: true,
   });
 
+  pusher.connection.bind("connected", () => {
+    console.log("✅ Pusher bağlantısı açıldı.");
+    if (onConnected) onConnected();
+  });
+
   const channelName = `chatrooms.${channelId}.v2`;
   const channel = pusher.subscribe(channelName);
 
-  //Bind all events globally
   channel.bind_global((event, data) => {
-    console.log(`📨 Event: ${event}`, data);
+    const alias = eventAlias[event];
 
-    eventBus.emit(`kick_${event}`, data);
+    if (alias) {
+      //console.log(`📨 Event: ${event}`, data);
+      //console.log(` Event Alias: ${alias}`);
+
+      eventBus.emit(alias, data);
+    } else {
+      console.log(`❔ Bilinmeyen event: ${event}`, data);
+    }
   });
 
   console.log(`📡 Dinleniyor: ${channelName}`);

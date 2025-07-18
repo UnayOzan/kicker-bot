@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RPG Oyuncu Listesi</title>
+</head>
+<body>
+  <h1>Oyuncular</h1>
+  <ul id="playerList"></ul>
+
+  <script>
+    async function fetchPlayers() {
+      const res = await fetch('/players');
+      const players = await res.json();
+
+      const list = document.getElementById('playerList');
+      list.innerHTML = '';
+
+      for (const [username, data] of Object.entries(players)) {
+        const li = document.createElement('li');
+        li.textContent = `${username} — ${data.class} — HP: ${data.stats.hp}, ATK: ${data.stats.atk}, DEF: ${data.stats.def}`;
+        list.appendChild(li);
+      }
+    }
+
+    // Sayfa yüklendiğinde oyuncuları getir
+    fetchPlayers();
+
+    // 5 saniyede bir yenile
+    setInterval(fetchPlayers, 5000);
+  </script>
+</body>
+</html>

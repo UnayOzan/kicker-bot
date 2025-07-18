@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { players } from "./game/game.js";
 
 const PORT = process.env.PORT || 3000;
 const HOST_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
@@ -10,9 +11,14 @@ export const startServer = () => {
 
   app.use(cors());
   app.use(express.json());
+  app.use(express.static('public'));
 
   app.get("/", (req, res) => {
     res.send("🚀 Kickable Bot API Aktif!");
+  });
+
+  app.get("/players", (req, res) => {
+    res.json(players);
   });
 
   app.post("/kick-event", (req, res) => {
