@@ -1,12 +1,11 @@
 import { startServer } from "./api/server.js";
 import { startListener } from "./api/listener.js";
-import { checkRedemptions } from "./api/checkRedemptions.js";
-import { startRPG } from "./api/game/startGame.js";
+import { prepareRPG } from "./api/game/prepareGame.js";
 
 startServer();
 
 startListener(() => {
-    startRPG();
+    prepareRPG();
 });
 
 //setInterval(checkRedemptions, 10000);
