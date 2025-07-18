@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { players, gameState, startNextTurn, endTurn } from "./game/game.js";
+import { players, gameState, startNextTurn, endTurn, handleAction } from "./game/game.js";
 
 const PORT = process.env.PORT || 3000;
 const HOST_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;

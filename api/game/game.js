@@ -1,7 +1,7 @@
 export const players = {};
 
 export const gameState = {
-  status: "Beklemede",  // Örnek durumlar: Beklemede, Başladı, Turda, Bitti
+  status: "Beklemede",  // Beklemede, Turda
   turn: 0,
   turnStartTimestamp: null,
 };
@@ -25,6 +25,7 @@ export function handleJoin(username, className) {
     players[username] = {
         class: className,
         stats: { ...baseStats },
+        lastAction: "Beklemede",
     };
     console.log(`✅ ${username} oyuna katıldı! Sınıfı: ${className}`);
 }
@@ -42,6 +43,12 @@ export function startNextTurn() {
     gameState.turn++;
     gameState.status = "Turda";
     gameState.turnStartTimestamp = Date.now();
+
+    // Her tur başında oyuncuların lastAction'ını sıfırla
+    for (const player of Object.values(players)) {
+        player.lastAction = "Beklemede";
+    }
+
     console.log(`🕒 Tur ${gameState.turn} başladı.`);
 }
 
@@ -50,3 +57,28 @@ export function endTurn() {
     gameState.turnStartTimestamp = null;
     console.log(`🕒 Tur ${gameState.turn} sona erdi.`);
 }
+
+// Komutları işleyen fonksiyon
+export function handleAction(username, action) {
+    if (gameState.status !== "Turda") {
+        console.log(`❌ ${username} -> Tur başlamadan hamle yapılamaz.`);
+        return { error: "Tur başlamadan hamle yapılamaz." };
+    }
+
+    const player = players[username];
+    if (!player) {
+        console.log(`❌ ${username} -> Karakter yok.`);
+        return { error: "Karakter bulunamadı." };
+    }
+
+    if (!["attack", "defence", "heal"].includes(action)) {
+        console.log(`❌ ${username} -> Geçersiz hamle: ${action}`);
+        return { error: "Geçersiz hamle." };
+    }
+
+    player.lastAction = action;
+    console.log(`✅ ${username} hamle yaptı: ${action}`);
+    return { success: true };
+}
+
+

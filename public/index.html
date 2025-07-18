@@ -2,12 +2,36 @@
 <html>
 
 <head>
-  <title>RPG Oyuncu Listesi - Manuel Tur Sistemi</title>
+  <title>RPG Gözlemci Paneli</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    .player {
+      margin-bottom: 8px;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Oyuncular (Gerçek Zamanlı)</h1>
-  <div id="error" style="color: red;"></div>
+  <h1>🧙 RPG Gözlemci Paneli</h1>
 
   <div>
     <strong>Oyun Durumu:</strong> <span id="gameStatus"></span><br>
@@ -15,28 +39,44 @@
     <strong>Tur Süresi:</strong> <span id="turnTimer"></span> saniye
   </div>
 
-  <button id="startTurnBtn">Tur Başlat</button>
-  <button id="endTurnBtn">Tur Bitir</button>
+  <button id="startTurnBtn">🔄 Tur Başlat</button>
+  <button id="endTurnBtn">⏹️ Tur Bitir</button>
 
+  <h3>Oyuncular</h3>
   <ul id="playerList"></ul>
+
+  <h3>Hamle Logu</h3>
+  <div id="log" style="background:#222; padding:10px; height:150px; overflow:auto;"></div>
 
   <script>
     let turnStartTimestamp = null;
+    const actionHistory = {};
 
     function renderPlayers(players) {
       const list = document.getElementById("playerList");
       list.innerHTML = "";
+
       for (const [username, data] of Object.entries(players)) {
         const li = document.createElement("li");
-        li.textContent = `${username} — ${data.class} — HP: ${data.stats.hp}, ATK: ${data.stats.atk}, DEF: ${data.stats.def}`;
+        li.className = "player";
+        li.innerHTML = `
+          <strong>${username}</strong> (${data.class})<br>
+          HP: ${data.stats.hp} | ATK: ${data.stats.atk} | DEF: ${data.stats.def}<br>
+          <em>Son Hamle:</em> ${data.lastAction}
+        `;
         list.appendChild(li);
+
+        // Hamle değiştiyse logla
+        if (actionHistory[username] !== data.lastAction && data.lastAction !== "Beklemede") {
+          actionHistory[username] = data.lastAction;
+          addLog(`${username} → ${data.lastAction.toUpperCase()}`);
+        }
       }
     }
 
     function updateGameState(gameState) {
       document.getElementById("gameStatus").textContent = gameState.status;
       document.getElementById("turnNumber").textContent = gameState.turn;
-
       turnStartTimestamp = gameState.turnStartTimestamp;
       updateTurnTimer();
     }
@@ -50,53 +90,35 @@
       document.getElementById("turnTimer").textContent = elapsed;
     }
 
-    function showError(msg) {
-      const errEl = document.getElementById("error");
-      errEl.textContent = msg;
+    function addLog(msg) {
+      const log = document.getElementById("log");
+      const line = document.createElement("div");
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
     }
 
-    // SSE bağlantısı
     const evtSource = new EventSource("/players-stream");
 
     evtSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        renderPlayers(data.players);
-        updateGameState(data.gameState);
-        showError("");
-      } catch (e) {
-        showError("Veri işlenirken hata oluştu.");
-      }
+      const data = JSON.parse(event.data);
+      renderPlayers(data.players);
+      updateGameState(data.gameState);
     };
 
-    evtSource.onerror = () => {
-      showError("Bağlantı hatası, tekrar bağlanıyor...");
-    };
-
-    setInterval(() => {
-      updateTurnTimer();
-    }, 1000);
-
-    // Butonlar için event listener
     document.getElementById("startTurnBtn").addEventListener("click", async () => {
-      try {
-        const res = await fetch("/start-turn", { method: "POST" });
-        const data = await res.json();
-        showError(data.message);
-      } catch {
-        showError("Tur başlatılamadı.");
-      }
+      const res = await fetch("/start-turn", { method: "POST" });
+      const data = await res.json();
+      addLog(data.message);
     });
 
     document.getElementById("endTurnBtn").addEventListener("click", async () => {
-      try {
-        const res = await fetch("/end-turn", { method: "POST" });
-        const data = await res.json();
-        showError(data.message);
-      } catch {
-        showError("Tur bitirilemedi.");
-      }
+      const res = await fetch("/end-turn", { method: "POST" });
+      const data = await res.json();
+      addLog(data.message);
     });
+
+    setInterval(updateTurnTimer, 1000);
   </script>
 </body>
 
