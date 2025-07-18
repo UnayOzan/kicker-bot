@@ -1,5 +1,10 @@
-// game.js
 export const players = {};
+
+export const gameState = {
+  status: "Beklemede",  // Örnek durumlar: Beklemede, Başladı, Turda, Bitti
+  turn: 0,
+  turnStartTimestamp: null,
+};
 
 export const classes = {
     archer: { hp: 80, atk: 15, def: 5 },
@@ -31,4 +36,17 @@ export function handleStats(username) {
         return;
     }
     console.log(`📊 ${username} (${player.class}) =>`, player.stats);
+}
+
+export function startNextTurn() {
+    gameState.turn++;
+    gameState.status = "Turda";
+    gameState.turnStartTimestamp = Date.now();
+    console.log(`🕒 Tur ${gameState.turn} başladı.`);
+}
+
+export function endTurn() {
+    gameState.status = "Beklemede";
+    gameState.turnStartTimestamp = null;
+    console.log(`🕒 Tur ${gameState.turn} sona erdi.`);
 }

@@ -1,32 +1,103 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>RPG Oyuncu Listesi</title>
+  <title>RPG Oyuncu Listesi - Manuel Tur Sistemi</title>
 </head>
+
 <body>
-  <h1>Oyuncular</h1>
+  <h1>Oyuncular (Gerçek Zamanlı)</h1>
+  <div id="error" style="color: red;"></div>
+
+  <div>
+    <strong>Oyun Durumu:</strong> <span id="gameStatus"></span><br>
+    <strong>Tur:</strong> <span id="turnNumber"></span><br>
+    <strong>Tur Süresi:</strong> <span id="turnTimer"></span> saniye
+  </div>
+
+  <button id="startTurnBtn">Tur Başlat</button>
+  <button id="endTurnBtn">Tur Bitir</button>
+
   <ul id="playerList"></ul>
 
   <script>
-    async function fetchPlayers() {
-      const res = await fetch('/players');
-      const players = await res.json();
+    let turnStartTimestamp = null;
 
-      const list = document.getElementById('playerList');
-      list.innerHTML = '';
-
+    function renderPlayers(players) {
+      const list = document.getElementById("playerList");
+      list.innerHTML = "";
       for (const [username, data] of Object.entries(players)) {
-        const li = document.createElement('li');
+        const li = document.createElement("li");
         li.textContent = `${username} — ${data.class} — HP: ${data.stats.hp}, ATK: ${data.stats.atk}, DEF: ${data.stats.def}`;
         list.appendChild(li);
       }
     }
 
-    // Sayfa yüklendiğinde oyuncuları getir
-    fetchPlayers();
+    function updateGameState(gameState) {
+      document.getElementById("gameStatus").textContent = gameState.status;
+      document.getElementById("turnNumber").textContent = gameState.turn;
 
-    // 5 saniyede bir yenile
-    setInterval(fetchPlayers, 5000);
+      turnStartTimestamp = gameState.turnStartTimestamp;
+      updateTurnTimer();
+    }
+
+    function updateTurnTimer() {
+      if (!turnStartTimestamp) {
+        document.getElementById("turnTimer").textContent = "0";
+        return;
+      }
+      const elapsed = Math.floor((Date.now() - turnStartTimestamp) / 1000);
+      document.getElementById("turnTimer").textContent = elapsed;
+    }
+
+    function showError(msg) {
+      const errEl = document.getElementById("error");
+      errEl.textContent = msg;
+    }
+
+    // SSE bağlantısı
+    const evtSource = new EventSource("/players-stream");
+
+    evtSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        renderPlayers(data.players);
+        updateGameState(data.gameState);
+        showError("");
+      } catch (e) {
+        showError("Veri işlenirken hata oluştu.");
+      }
+    };
+
+    evtSource.onerror = () => {
+      showError("Bağlantı hatası, tekrar bağlanıyor...");
+    };
+
+    setInterval(() => {
+      updateTurnTimer();
+    }, 1000);
+
+    // Butonlar için event listener
+    document.getElementById("startTurnBtn").addEventListener("click", async () => {
+      try {
+        const res = await fetch("/start-turn", { method: "POST" });
+        const data = await res.json();
+        showError(data.message);
+      } catch {
+        showError("Tur başlatılamadı.");
+      }
+    });
+
+    document.getElementById("endTurnBtn").addEventListener("click", async () => {
+      try {
+        const res = await fetch("/end-turn", { method: "POST" });
+        const data = await res.json();
+        showError(data.message);
+      } catch {
+        showError("Tur bitirilemedi.");
+      }
+    });
   </script>
 </body>
+
 </html>
