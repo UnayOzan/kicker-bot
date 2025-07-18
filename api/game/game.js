@@ -31,6 +31,8 @@ export function handleJoin(username, className) {
         lastAction: "Beklemede",
     };
     console.log(`✅ ${username} oyuna katıldı! Sınıfı: ${className}`);
+    
+    broadcast({ players, gameState });
 }
 
 export function handleStats(username) {

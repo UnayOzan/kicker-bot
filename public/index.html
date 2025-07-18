@@ -1,35 +1,15 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>RPG Gözlemci Paneli</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #111;
-      color: #eee;
-    }
-
-    button {
-      margin: 5px;
-      padding: 10px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      margin: 5px 0;
-    }
-
-    .player {
-      margin-bottom: 8px;
-    }
+    body { font-family: sans-serif; background: #111; color: #eee; }
+    button { margin: 5px; padding: 10px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
+    .player { margin-bottom: 8px; }
   </style>
 </head>
-
 <body>
   <h1>🧙 RPG Gözlemci Paneli</h1>
 
@@ -98,6 +78,21 @@
       log.scrollTop = log.scrollHeight;
     }
 
+    // İlk yüklenişte REST API'den veri al
+    async function fetchInitialData() {
+      try {
+        const res = await fetch("/players");
+        const data = await res.json();
+        renderPlayers(data.players);
+        updateGameState(data.gameState);
+      } catch (e) {
+        console.error("İlk veri çekilemedi:", e);
+      }
+    }
+
+    fetchInitialData();
+
+    // SSE bağlantısını kur
     const evtSource = new EventSource("/players-stream");
 
     evtSource.onmessage = (event) => {
@@ -121,5 +116,4 @@
     setInterval(updateTurnTimer, 1000);
   </script>
 </body>
-
 </html>

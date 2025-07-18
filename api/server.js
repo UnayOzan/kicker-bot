@@ -35,7 +35,9 @@ export const startServer = () => {
     });
   });
 
-
+  app.get("/players", (req, res) => {
+    res.json({ players, gameState });
+  });
 
   app.post("/start-turn", (req, res) => {
     startNextTurn();
