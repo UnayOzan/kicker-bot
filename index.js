@@ -7,5 +7,4 @@ startListener();
 
 //setInterval(checkRedemptions, 10000);
 
-
 console.log("Sistem başlatıldı.");

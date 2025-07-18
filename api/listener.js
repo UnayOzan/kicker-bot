@@ -1,4 +1,5 @@
 import Pusher from "pusher-js";
+import { eventBus } from "./misc/eventBus";
 
 const channelId = "55150469";
 const appKey = "32cbd69e4b950bf97679"; // Kick'in sabit Pusher app key'i
@@ -16,26 +17,11 @@ export const startListener = () => {
   const channelName = `chatrooms.${channelId}.v2`;
   const channel = pusher.subscribe(channelName);
 
-  channel.bind("new_message", (data) => {
-    const username = data?.sender?.username;
-    const content = data?.content;
-    if (username && content) {
-      console.log(`💬 ${username}: ${content}`);
-    }
-  });
-
-  channel.bind("message_deleted", (data) => {
-    console.log(`❌ Mesaj silindi:`, data);
-  });
-
-  channel.bind("reward-redeemed", (data) => {
-    console.log(`🎁 ${data.username} bir ödül kullandı: ${data.reward}`);
-    console.log(data);
-  });
-
-  //Tüm event'leri görmek istersen:
+  //Bind all events globally
   channel.bind_global((event, data) => {
     console.log(`📨 Event: ${event}`, data);
+
+    eventBus.emit(`kick_${event}`, data);
   });
 
   console.log(`📡 Dinleniyor: ${channelName}`);
