@@ -1,4 +1,4 @@
-import { eventBus } from "../misc/eventBus";
+import { eventBus } from "../misc/eventBus.js";
 
 const players = {};
 
