@@ -5,7 +5,7 @@ import { checkRedemptions } from "./api/checkRedemptions.js";
 startServer();
 startListener();
 
-setInterval(checkRedemptions, 10000);
+//setInterval(checkRedemptions, 10000);
 
 
 console.log("Sistem başlatıldı.");
