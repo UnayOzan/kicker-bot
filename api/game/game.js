@@ -16,6 +16,11 @@ export const classes = {
 };
 
 export function handleJoin(username, className) {
+    if (gameState.status != "Açık") {
+        console.log(`⚠️ ${username}, şu anda oyuna katılamazsın.`);
+        return;
+    }
+
     if (players[username]) {
         console.log(`⚠️ ${username} zaten bir karakter oluşturmuş.`);
         return;
@@ -31,7 +36,7 @@ export function handleJoin(username, className) {
         lastAction: "Beklemede",
     };
     console.log(`✅ ${username} oyuna katıldı! Sınıfı: ${className}`);
-    
+
     broadcast({ players, gameState });
 }
 
@@ -42,6 +47,12 @@ export function handleStats(username) {
         return;
     }
     console.log(`📊 ${username} (${player.class}) =>`, player.stats);
+}
+
+export function openRoom(){
+    gameState.status = "Açık";
+    
+    broadcast({ players, gameState });
 }
 
 export function startNextTurn() {

@@ -38,16 +38,6 @@ export const startServer = () => {
   app.get("/players", (req, res) => {
     res.json({ players, gameState });
   });
-
-  app.post("/start-turn", (req, res) => {
-    startNextTurn();
-    res.json({ message: `Tur ${gameState.turn} başladı.` });
-  });
-
-  app.post("/end-turn", (req, res) => {
-    endTurn();
-    res.json({ message: `Tur ${gameState.turn} sona erdi.` });
-  });
   //#endregion
 
   app.post("/kick-event", (req, res) => {
