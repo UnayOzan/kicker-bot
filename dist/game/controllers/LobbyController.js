@@ -14,7 +14,7 @@ export function openLobby() {
     gameState.log.push("🔓 Lobby opened. Players can join.");
     console.log("🔓 Lobby opened. Players can join.");
     broadcast({ gameState });
-    console.log("⏳ Game will begin in 10 seconds.");
+    console.log(`⏳ Game will begin in ${gameState.lobby.waitTime} seconds.`);
     const interval = setInterval(() => {
         if (typeof gameState.lobby.waitTime === "number") {
             gameState.lobby.waitTime--;

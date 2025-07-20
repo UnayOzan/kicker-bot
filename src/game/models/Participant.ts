@@ -1,14 +1,14 @@
 export enum ParticipantActions {
     Idle = "idle",
-    Attack = "attack",
-    Heal = "heal",
-    Defend = "defend",
+    Attack = "attack", //kilic
+    Heal = "heal", //kitap
+    Defend = "defend", //kalkan
 }
 
 export enum ParticipantClasses {
-    Archer = "archer",
-    Healer = "healer",
-    Defender = "defender",
+    Archer = "archer", //kirmizi
+    Healer = "healer", //yesil
+    Defender = "defender", //mavi
 }
 
 export interface ParticipantStats {
