@@ -20,6 +20,23 @@
       justify-content: space-between;
       align-items: center;
       min-height: 100px;
+      position: relative;
+      transition: background-color 0.5s ease;
+    }
+
+    .playerCell.attack {
+      background-color: #991b1b;
+      /* kırmızı tonları */
+    }
+
+    .playerCell.defense {
+      background-color: #1e40af;
+      /* mavi tonları */
+    }
+
+    .playerCell.heal {
+      background-color: #166534;
+      /* yeşil tonları */
     }
 
     .playerInfo,
@@ -31,18 +48,91 @@
       font-size: 0.85rem;
       margin-top: 0.25rem;
     }
+
+    /* Hasar popup */
+    .damage-popup {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #f87171;
+      /* kırmızı-400 */
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.8s ease-out;
+      user-select: none;
+      z-index: 10;
+      text-shadow: 0 0 5px black;
+    }
+
+    .damage-popup.show {
+      top: -20px;
+      opacity: 1;
+    }
+
+    /* Kayan yazı */
+    .scroll-text {
+      white-space: nowrap;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scroll-text span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll 8s linear infinite;
+    }
+
+    @keyframes scroll {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-100%);
+      }
+    }
   </style>
 </head>
 
 <body class="bg-gray-900 text-white min-h-screen p-6">
   <div class="max-w-5xl mx-auto">
-    <h1 class="text-4xl font-extrabold mb-6">🧙 RPG Observer Panel</h1>
+    <h1 class="text-4xl font-extrabold mb-6">🧙 Oynuyoruz Panel</h1>
 
-    <section class="mb-6 p-4 bg-gray-800 rounded shadow font-mono space-y-1">
-      <div><strong>Status:</strong> <span id="gameStatus"></span></div>
-      <div><strong>Turn:</strong> <span id="turnNumber"></span></div>
-      <div><strong>Timer:</strong> <span id="turnTimer"></span> sec</div>
-      <div><strong>Dungeon Floor:</strong> <span id="dungeonFloor"></span></div>
+    <section class="mb-6 p-4 bg-gray-800 rounded shadow font-mono">
+      <div class="flex justify-between items-center gap-4 flex-wrap">
+
+        <div class="flex flex-col items-center">
+          <span class="text-xs text-gray-400">Durum</span>
+          <div class="flex items-center gap-1 text-lg">
+            🎮 <span id="gameStatus"></span>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <span class="text-xs text-gray-400">Tur</span>
+          <div class="flex items-center gap-1 text-lg">
+            🔄 <span id="turnNumber"></span>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <span class="text-xs text-gray-400">Süre</span>
+          <div class="flex items-center gap-1 text-lg">
+            ⏳ <span id="turnTimer"></span>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <span class="text-xs text-gray-400">Kat</span>
+          <div class="flex items-center gap-1 text-lg">
+            🗺️ <span id="dungeonFloor"></span>
+          </div>
+        </div>
+
+      </div>
     </section>
 
     <section class="mb-6">
@@ -61,8 +151,22 @@
     let lastTurnNumber = 0;
     let timerInterval = null;
     let roundStartTimestamp = null;
+    const previousHp = {};
 
     const icons = { hp: '❤️', atk: '⚔️', def: '🛡️' };
+
+    function showDamage(username, amount) {
+      const popup = document.getElementById(`damage-${username}`);
+      if (!popup) return;
+
+      popup.textContent = `-${amount}`;
+      popup.classList.add("show");
+
+      setTimeout(() => {
+        popup.classList.remove("show");
+        popup.textContent = "";
+      }, 800);
+    }
 
     function renderPlayers(players, enemies) {
       const grid = document.getElementById("playerGrid");
@@ -73,23 +177,48 @@
         if (!players[username]) delete actionHistory[username];
       }
 
+      // Clean previousHp for removed players
+      for (const username in previousHp) {
+        if (!players[username]) delete previousHp[username];
+      }
+
       Object.entries(players).forEach(([username, player]) => {
         const enemy = enemies?.[username];
 
         const cell = document.createElement("div");
         cell.className = "playerCell";
 
+        // Arka plan rengini lastAction göre ayarla
+        cell.classList.remove("attack", "defense", "heal");
+        switch ((player.lastAction || "").toLowerCase()) {
+          case "attack":
+            cell.classList.add("attack");
+            break;
+          case "defense":
+            cell.classList.add("defense");
+            break;
+          case "heal":
+            cell.classList.add("heal");
+            break;
+          default:
+            break;
+        }
+
+        cell.style.position = "relative"; // Hasar popup için
+
         const playerDiv = document.createElement("div");
         playerDiv.className = "playerInfo";
         playerDiv.innerHTML = `
           <div class="font-semibold text-lg mb-1">${username}</div>
-          <div class="italic text-sm mb-1">${player.class}</div>
           <div class="stats">
-            <div>${icons.hp} HP: ${player.stats.hp}</div>
-            <div>${icons.atk} ATK: ${player.stats.atk}</div>
-            <div>${icons.def} DEF: ${player.stats.def}</div>
+            <div class="text-3xl mb-1">${player.stats.icon || "👹"}</div>
+            <div class="font-mono text-lg">${player.class}</div>
+            <div class="text-sm mt-1">${icons.hp} ${player.stats.hp} | ${icons.atk} ${player.stats.atk} | ${icons.def} ${player.stats.def}</div>
           </div>
           <div class="mt-2 text-yellow-300 italic text-xs">Action: ${player.lastAction || "Idle"}</div>
+          <div class="scroll-text text-xs text-yellow-400 mt-1">
+            <span>${player.combatLog || "Waiting for action..."}</span>
+          </div>
         `;
 
         const enemyDiv = document.createElement("div");
@@ -107,7 +236,21 @@
 
         cell.appendChild(playerDiv);
         cell.appendChild(enemyDiv);
+
+        // Hasar popup elemanı ekle
+        const popup = document.createElement("div");
+        popup.className = "damage-popup";
+        popup.id = `damage-${username}`;
+        cell.appendChild(popup);
+
         grid.appendChild(cell);
+
+        // Hasar kontrolü ve popup gösterimi
+        const prevHp = previousHp[username] ?? player.stats.hp;
+        if (player.stats.hp < prevHp) {
+          showDamage(username, prevHp - player.stats.hp);
+        }
+        previousHp[username] = player.stats.hp;
       });
     }
 
@@ -123,32 +266,40 @@
       document.getElementById("gameStatus").textContent = state.status || "Unknown";
       document.getElementById("turnNumber").textContent = state.round?.turn || 0;
       document.getElementById("dungeonFloor").textContent = state.dungeon?.floor || 1;
-
-      // Timer
-      roundStartTimestamp = state.round?.startTimestamp || null;
+      const timerEl = document.getElementById("turnTimer");
 
       if (timerInterval) clearInterval(timerInterval);
 
-      if (roundStartTimestamp) {
-        const timerEl = document.getElementById("turnTimer");
-        const updateTimer = () => {
-          const elapsed = Math.floor((Date.now() - roundStartTimestamp) / 1000);
-          timerEl.textContent = elapsed;
-        };
-        updateTimer();
-        timerInterval = setInterval(updateTimer, 1000);
-      } else {
-        document.getElementById("turnTimer").textContent = "0";
+      const validStatuses = ["Lobby", "InTurn", "Processing"];
+
+      if (!validStatuses.includes(state.status)) {
+        timerEl.textContent = "0 sec";
+        return;
       }
+
+      const updateTimer = () => {
+        if (state.status === "Lobby" && state.lobby?.waitTime !== undefined && state.lobby.waitTime !== null) {
+          timerEl.textContent = state.lobby.waitTime + " sec";
+        } else if (state.round?.startTimestamp) {
+          const elapsed = Math.floor((Date.now() - state.round.startTimestamp) / 1000);
+          timerEl.textContent = elapsed + " sec";
+        } else {
+          timerEl.textContent = "-";
+        }
+      };
+
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
     }
 
     function handleNewGame(gameState) {
-      const isNewGame = gameState.round.turn < lastTurnNumber;
+      const turn = gameState.round?.turn ?? 0;
+      const isNewGame = turn < lastTurnNumber;
       if (isNewGame) {
         document.getElementById("log").innerHTML = "";
         actionHistory = {};
       }
-      lastTurnNumber = gameState.round.turn;
+      lastTurnNumber = turn;
     }
 
     function updateActionLog(players) {
@@ -161,16 +312,25 @@
     }
 
     const evtSource = new EventSource("/players-stream");
+
+    evtSource.onopen = () => {
+      addLog("Bağlantı kuruldu.");
+    };
+
+    evtSource.onerror = (err) => {
+      addLog("Bağlantı hatası! Yeniden bağlanmaya çalışılıyor...");
+    };
+
     evtSource.onmessage = (event) => {
-      if (!event.data) return; // Boş veri geldiyse geç
+      if (!event.data) return;
 
       const data = JSON.parse(event.data);
       const gameState = data.gameState;
 
-      renderPlayers(gameState.lobby.players, gameState.round.enemies);
+      renderPlayers(gameState.lobby?.players || {}, gameState.round?.enemies || {});
       updateGameInfo(gameState);
       handleNewGame(gameState);
-      updateActionLog(gameState.lobby.players);
+      updateActionLog(gameState.lobby?.players || {});
 
       if (data.systemMessage) addLog(data.systemMessage);
     };
