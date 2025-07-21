@@ -1,18 +1,27 @@
-export var Commands;
-(function (Commands) {
-    Commands["Start"] = "!startrpg";
-    Commands["Join"] = "!join";
-    Commands["Leave"] = "!leave";
-    Commands["Attack"] = "!attack";
-    Commands["Defend"] = "!defend";
-    Commands["Heal"] = "!heal";
-    Commands["Stats"] = "!stats";
-    Commands["Players"] = "!players";
-    Commands["Help"] = "!help";
-    Commands["AttackEmote"] = "[emote:4029575:elderwiggleaksiyonSaldir]";
-    Commands["DefendEmote"] = "![emote:4029578:elderwiggleaksiyonSavun]";
-    Commands["HealEmote"] = "[emote:4029577:elderwiggleaksiyonCanver]";
-    Commands["ArcherEmote"] = "[emote:4029549:elderwigglesinifOkcu]";
-    Commands["DefenderEmote"] = "[emote:4029553:elderwigglesinifSavunmaci]";
-    Commands["HealerEmote"] = "[emote:4029551:elderwigglesinifSifaci]";
-})(Commands || (Commands = {}));
+export var GameControlCommands;
+(function (GameControlCommands) {
+    GameControlCommands["Start"] = "!startrpg";
+    GameControlCommands["Join"] = "!join";
+    GameControlCommands["Leave"] = "!leave";
+})(GameControlCommands || (GameControlCommands = {}));
+export var ActionCommands;
+(function (ActionCommands) {
+    ActionCommands["Attack"] = "!attack";
+    ActionCommands["Defend"] = "!defend";
+    ActionCommands["Heal"] = "!heal";
+})(ActionCommands || (ActionCommands = {}));
+export var InfoCommands;
+(function (InfoCommands) {
+    InfoCommands["Stats"] = "!stats";
+    InfoCommands["Players"] = "!players";
+    InfoCommands["Help"] = "!help";
+})(InfoCommands || (InfoCommands = {}));
+export var EmoteCommands;
+(function (EmoteCommands) {
+    EmoteCommands["AttackEmote"] = "[emote:4029575:elderwiggleaksiyonSaldir]";
+    EmoteCommands["DefendEmote"] = "![emote:4029578:elderwiggleaksiyonSavun]";
+    EmoteCommands["HealEmote"] = "[emote:4029577:elderwiggleaksiyonCanver]";
+    EmoteCommands["ArcherEmote"] = "[emote:4029549:elderwigglesinifOkcu]";
+    EmoteCommands["DefenderEmote"] = "[emote:4029553:elderwigglesinifSavunmaci]";
+    EmoteCommands["HealerEmote"] = "[emote:4029551:elderwigglesinifSifaci]";
+})(EmoteCommands || (EmoteCommands = {}));

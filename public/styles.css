@@ -1,0 +1,80 @@
+#playerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.playerCell {
+  background: #2d3748;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 100px;
+  position: relative;
+  transition: background-color 0.5s ease;
+}
+
+.playerCell.attack {
+  background-color: #991b1b;
+}
+.playerCell.defense {
+  background-color: #1e40af;
+}
+.playerCell.heal {
+  background-color: #166534;
+}
+
+.playerInfo,
+.enemyInfo {
+  width: 48%;
+}
+
+.stats div {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.damage-popup {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #f87171;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.8s ease-out;
+  user-select: none;
+  z-index: 10;
+  text-shadow: 0 0 5px black;
+}
+.damage-popup.show {
+  top: -20px;
+  opacity: 1;
+}
+
+.scroll-text {
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+}
+.scroll-text span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll 8s linear infinite;
+}
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+.lobby-panel, .tutorial-panel, .gameover-panel {
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
+}
+.lobby-player {
+  min-height: 48px;
+} 
