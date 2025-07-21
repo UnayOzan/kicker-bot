@@ -13,10 +13,6 @@ export const startServer = (): void => {
   app.use(express.json());
   app.use(express.static("public"));
 
-  app.get("/", (_req: Request, res: Response) => {
-    res.send("🚀 Kickable Bot API is active!");
-  });
-
   app.get("/players-stream", (_req: Request, res: Response) => {
     res.set({
       "Content-Type": "text/event-stream",
