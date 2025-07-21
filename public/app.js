@@ -19,15 +19,22 @@ function showDamage(username, amount) {
 function renderTutorial() {
   return `
     <div class="tutorial-panel bg-gray-800 p-6 rounded shadow text-center">
-      <h2 class="text-2xl font-bold mb-4">How to Play</h2>
+      <h2 class="text-2xl font-bold mb-4">Nasıl Oynanır?</h2>
       <ul class="mb-4 text-lg text-left mx-auto max-w-xl">
-        <li>1. Wait for the game to start.</li>
-        <li>2. When the lobby opens, join with <span class="font-mono bg-gray-700 px-2 py-1 rounded">!join &lt;class&gt;</span> (archer, healer, defender).</li>
-        <li>3. When the game starts, use <span class="font-mono bg-gray-700 px-2 py-1 rounded">!attack</span>, <span class="font-mono bg-gray-700 px-2 py-1 rounded">!defend</span>, <span class="font-mono bg-gray-700 px-2 py-1 rounded">!heal</span> to play.</li>
-        <li>4. You can check your stats with <span class="font-mono bg-gray-700 px-2 py-1 rounded">!stats</span> and see all players with <span class="font-mono bg-gray-700 px-2 py-1 rounded">!players</span>.</li>
-        <li>5. Type <span class="font-mono bg-gray-700 px-2 py-1 rounded">!help</span> for all commands.</li>
+        <li>1. Oyun başlamasını bekleyin.</li>
+        <li>2. Lobby açıldığında, <span class="font-mono bg-gray-700 px-2 py-1 rounded">!join &lt;class&gt;</span> (archer, healer, defender) komutuyla katılın.</li>
+        <li>3. Oyun başladığında aşağıdaki komutları kullanarak oynayın:</li>
+        <ul class="ml-6 list-disc">
+          <li><span class="font-mono bg-gray-700 px-2 py-1 rounded">!attack</span> - Saldırı yapar</li>
+          <li><span class="font-mono bg-gray-700 px-2 py-1 rounded">!defend</span> - Savunma yapar</li>
+          <li><span class="font-mono bg-gray-700 px-2 py-1 rounded">!heal</span> - Kendini veya birini iyileştirir</li>
+        </ul>
+        <li>Komutları yazarken emote (ör: ⚔️, 🛡️, ❤️) kullanabilirsiniz. Örnek: <span class="font-mono bg-gray-700 px-2 py-1 rounded">!attack ⚔️</span></li>
+        <li><span class="font-mono bg-gray-700 px-2 py-1 rounded">!stats</span> ile kendi istatistiklerinizi görebilirsiniz.</li>
+        <li><span class="font-mono bg-gray-700 px-2 py-1 rounded">!players</span> ile tüm oyuncuları görebilirsiniz.</li>
+        <li>Tüm komutlar için <span class="font-mono bg-gray-700 px-2 py-1 rounded">!help</span> yazabilirsiniz.</li>
       </ul>
-      <div class="text-yellow-300 text-lg">Waiting for the game to start...</div>
+      <div class="text-yellow-300 text-lg">Oyun başlamasını bekliyor...</div>
     </div>
   `;
 }
