@@ -1,7 +1,7 @@
 import gameState from "../models/GameState.js";
 import { ParticipantClasses, ParticipantActions } from "../models/Participant.js";
 import { GamePhase } from "../types/GamePhase.js";
-import { createDefaultLobby, WaitDuration } from "../models/Lobby.js";
+import { createDefaultLobby } from "../models/Lobby.js";
 import { createDefaultDungeon } from "../models/Dungeon.js";
 import { participantDefaultStats } from "../models/Participant.js";
 import { broadcast } from "../../api/Server.js";
@@ -20,17 +20,16 @@ export function openLobby(): void {
     console.log(`⏳ Game will begin in ${gameState.lobby.waitTime} seconds.`);
 
     const interval = setInterval(() => {
-        if (typeof gameState.lobby.waitTime === "number") {
-            gameState.lobby.waitTime--;
+        gameState.lobby.waitTime--;
 
-            broadcast({ gameState });
+        broadcast({ gameState });
 
-            if (gameState.lobby.waitTime <= 0) {
-                clearInterval(interval);
-                gameState.lobby.waitTime = WaitDuration.Pause;
-                startGame();
-            }
+        if (gameState.lobby.waitTime <= 0) {
+            clearInterval(interval);
+            gameState.lobby.waitTime = 0;
+            startGame();
         }
+
     }, 1000);
 }
 

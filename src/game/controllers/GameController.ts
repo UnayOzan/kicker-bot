@@ -7,7 +7,7 @@ import { RoundPair, Round } from "../models/Round.js";
 import { ParticipantActions } from "../models/Participant.js";
 
 export function startGame(): void {
-    gameState.recreate();
+    //gameState.recreate();
     startTurn();
 }
 
@@ -20,7 +20,8 @@ export function startTurn(): void {
         waitTime: 10,
         isBossFight: false,
         pairs: {},
-        log: []
+        startTimestamp : Date.now(),
+        log: [],
     };
 
     for (const [username, player] of Object.entries(gameState.lobby.players)) {
@@ -69,10 +70,13 @@ export function resolveTurn(): void {
         outcome.logs.forEach(log => results.push(log));
 
         if (outcome.enemyDead) {
+            console.log(`Enemy ${enemy} has died and is being removed from the lobby.`);
+
             pair.enemy = null as any;
         }
 
         if (outcome.playerDead) {
+            console.log(`Player ${username} has died and is being removed from the lobby.`);
             delete gameState.lobby.players[username];
         }
     }

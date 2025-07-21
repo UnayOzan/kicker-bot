@@ -14,5 +14,6 @@ export interface Round {
     waitTime: number;
     isBossFight: boolean;
     pairs: Record<string, RoundPair>;
+    startTimestamp: number;
     log: string[];
 }

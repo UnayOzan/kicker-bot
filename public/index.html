@@ -150,7 +150,6 @@
     let actionHistory = {};
     let lastTurnNumber = 0;
     let timerInterval = null;
-    let roundStartTimestamp = null;
     const previousHp = {};
 
     const icons = { hp: '❤️', atk: '⚔️', def: '🛡️' };
@@ -168,7 +167,7 @@
       }, 800);
     }
 
-    function renderPlayers(players, enemies) {
+    function renderPlayers(players, pairs) {
       const grid = document.getElementById("playerGrid");
       grid.innerHTML = "";
 
@@ -183,7 +182,8 @@
       }
 
       Object.entries(players).forEach(([username, player]) => {
-        const enemy = enemies?.[username];
+        const pair = pairs?.[username];
+        const enemy = pair?.enemy;
 
         const cell = document.createElement("div");
         cell.className = "playerCell";
@@ -194,7 +194,7 @@
           case "attack":
             cell.classList.add("attack");
             break;
-          case "defense":
+          case "defend":
             cell.classList.add("defense");
             break;
           case "heal":
@@ -209,27 +209,27 @@
         const playerDiv = document.createElement("div");
         playerDiv.className = "playerInfo";
         playerDiv.innerHTML = `
-          <div class="font-semibold text-lg mb-1">${username}</div>
-          <div class="stats">
-            <div class="text-3xl mb-1">${player.stats.icon || "👹"}</div>
-            <div class="font-mono text-lg">${player.class}</div>
-            <div class="text-sm mt-1">${icons.hp} ${player.stats.hp} | ${icons.atk} ${player.stats.atk} | ${icons.def} ${player.stats.def}</div>
-          </div>
-          <div class="mt-2 text-yellow-300 italic text-xs">Action: ${player.lastAction || "Idle"}</div>
-          <div class="scroll-text text-xs text-yellow-400 mt-1">
-            <span>${player.combatLog || "Waiting for action..."}</span>
-          </div>
-        `;
+      <div class="font-semibold text-lg mb-1">${username}</div>
+      <div class="stats">
+        <div class="text-3xl mb-1">${player.stats.icon || "👹"}</div>
+        <div class="font-mono text-lg">${player.class}</div>
+        <div class="text-sm mt-1">${icons.hp} ${player.stats.hp} | ${icons.atk} ${player.stats.atk} | ${icons.def} ${player.stats.def}</div>
+      </div>
+      <div class="mt-2 text-yellow-300 italic text-xs">Action: ${player.lastAction || "Idle"}</div>
+      <div class="scroll-text text-xs text-yellow-400 mt-1">
+        <span>${player.combatLog || "Waiting for action..."}</span>
+      </div>
+    `;
 
         const enemyDiv = document.createElement("div");
         enemyDiv.className = "enemyInfo text-right";
 
         if (enemy) {
           enemyDiv.innerHTML = `
-            <div class="text-3xl mb-1">${enemy.icon || "👹"}</div>
-            <div class="font-mono text-lg">${enemy.name}</div>
-            <div class="text-sm mt-1">${icons.hp} ${enemy.hp} | ${icons.atk} ${enemy.atk} | ${icons.def} ${enemy.def}</div>
-          `;
+        <div class="text-3xl mb-1">${enemy.icon || "👹"}</div>
+        <div class="font-mono text-lg">${enemy.name}</div>
+        <div class="text-sm mt-1">${icons.hp} ${enemy.hp} | ${icons.atk} ${enemy.atk} | ${icons.def} ${enemy.def}</div>
+      `;
         } else {
           enemyDiv.innerHTML = `<div class="italic text-gray-400">No Enemy</div>`;
         }
@@ -262,9 +262,17 @@
       logEl.scrollTop = logEl.scrollHeight;
     }
 
+    function getCurrentRound(state) {
+      if (state && state.rounds && state.rounds.length > 0) {
+        return state.rounds[state.rounds.length - 1];
+      }
+      return null;
+    }
+
     function updateGameInfo(state) {
       document.getElementById("gameStatus").textContent = state.status || "Unknown";
-      document.getElementById("turnNumber").textContent = state.round?.turn || 0;
+      const currentRound = getCurrentRound(state);
+      document.getElementById("turnNumber").textContent = currentRound?.turn || 0;
       document.getElementById("dungeonFloor").textContent = state.dungeon?.floor || 1;
       const timerEl = document.getElementById("turnTimer");
 
@@ -280,8 +288,8 @@
       const updateTimer = () => {
         if (state.status === "Lobby" && state.lobby?.waitTime !== undefined && state.lobby.waitTime !== null) {
           timerEl.textContent = state.lobby.waitTime + " sec";
-        } else if (state.round?.startTimestamp) {
-          const elapsed = Math.floor((Date.now() - state.round.startTimestamp) / 1000);
+        } else if (currentRound?.startTimestamp) {
+          const elapsed = Math.floor((Date.now() - currentRound.startTimestamp) / 1000);
           timerEl.textContent = elapsed + " sec";
         } else {
           timerEl.textContent = "-";
@@ -293,7 +301,8 @@
     }
 
     function handleNewGame(gameState) {
-      const turn = gameState.round?.turn ?? 0;
+      const currentRound = getCurrentRound(gameState);
+      const turn = currentRound?.turn ?? 0;
       const isNewGame = turn < lastTurnNumber;
       if (isNewGame) {
         document.getElementById("log").innerHTML = "";
@@ -325,9 +334,18 @@
       if (!event.data) return;
 
       const data = JSON.parse(event.data);
-      const gameState = data.gameState;
+      // gameState property’si yoksa, doğrudan data kullan
+      const gameState = data.gameState || data;
 
-      renderPlayers(gameState.lobby?.players || {}, gameState.round?.enemies || {});
+      if (!gameState || !gameState.rounds) {
+        console.log("data:", data);
+        addLog("Hatalı veya eksik gameState verisi geldi!");
+        return;
+      }
+
+      const currentRound = getCurrentRound(gameState);
+
+      renderPlayers(gameState.lobby?.players || {}, currentRound?.pairs || {});
       updateGameInfo(gameState);
       handleNewGame(gameState);
       updateActionLog(gameState.lobby?.players || {});

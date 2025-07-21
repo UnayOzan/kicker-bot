@@ -21,7 +21,6 @@ function simulateBattleTurn(player, enemy) {
     let enemyDamage = 0;
     let summaryLog = `${player.name} chose **${playerAction}**, ${enemy.name} chose **${enemyAction}**. `;
     if (playerAction === ParticipantActions.Idle) {
-        // player idle ise direk hasar alır
         playerDamage = minDamage;
         player.stats.hp -= playerDamage;
         summaryLog += `${player.name} did nothing and took ${playerDamage} damage.`;
@@ -39,7 +38,6 @@ function simulateBattleTurn(player, enemy) {
             summaryLog += `${enemy.name} dealt ${playerDamage} damage to ${player.name}.`;
         }
         else {
-            // draw ise çift taraf da hasar alır
             playerDamage = enemyDamage = minDamage;
             player.stats.hp -= playerDamage;
             enemy.stats.hp -= enemyDamage;

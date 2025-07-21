@@ -5,7 +5,7 @@ import { enemies } from "../data/Enemies.js";
 import { GamePhase } from "../types/GamePhase.js";
 import { ParticipantActions } from "../models/Participant.js";
 export function startGame() {
-    gameState.recreate();
+    //gameState.recreate();
     startTurn();
 }
 export function startTurn() {
@@ -15,7 +15,8 @@ export function startTurn() {
         waitTime: 10,
         isBossFight: false,
         pairs: {},
-        log: []
+        startTimestamp: Date.now(),
+        log: [],
     };
     for (const [username, player] of Object.entries(gameState.lobby.players)) {
         const randomEnemy = { ...enemies[Math.floor(Math.random() * enemies.length)] };
@@ -50,9 +51,11 @@ export function resolveTurn() {
         const outcome = simulateBattleTurn(player, enemy);
         outcome.logs.forEach(log => results.push(log));
         if (outcome.enemyDead) {
+            console.log(`Enemy ${enemy} has died and is being removed from the lobby.`);
             pair.enemy = null;
         }
         if (outcome.playerDead) {
+            console.log(`Player ${username} has died and is being removed from the lobby.`);
             delete gameState.lobby.players[username];
         }
     }

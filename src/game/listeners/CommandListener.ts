@@ -6,13 +6,62 @@ import { ParticipantActions, ParticipantClasses } from "../models/Participant.js
 import { handlePlayerJoin, handlePlayerLeave, openLobby } from "../controllers/LobbyController.js";
 import { eventBus } from "../misc/EventBus.js";
 
+// Komutları ve emote'ları ana komutlara yönlendiren yardımcı fonksiyon
+function resolveCommand(input: string): string | undefined {
+    switch (input) {
+        case Commands.Start:
+            return Commands.Start;
+        case Commands.Join:
+            return Commands.Join;
+        case Commands.Leave:
+            return Commands.Leave;
+        case Commands.Attack:
+        case Commands.AttackEmote:
+            return "attack";
+        case Commands.Defend:
+        case Commands.DefendEmote:
+            return "defend";
+        case Commands.Heal:
+        case Commands.HealEmote:
+            return "heal";
+        case Commands.Stats:
+            return Commands.Stats;
+        case Commands.Players:
+            return Commands.Players;
+        case Commands.Help:
+            return Commands.Help;
+        case Commands.ArcherEmote:
+        case Commands.DefenderEmote:
+        case Commands.HealerEmote:
+            return Commands.Join; // veya başka bir ana komut
+        default:
+            return undefined;
+    }
+}
+
+// Emote'dan className çözen yardımcı fonksiyon
+function resolveClassFromEmote(emote: string): string | undefined {
+    switch (emote) {
+        case Commands.ArcherEmote:
+            return "archer";
+        case Commands.DefenderEmote:
+            return "defender";
+        case Commands.HealerEmote:
+            return "healer";
+        default:
+            return undefined;
+    }
+}
+
 export function prepareRPG(): void {
     eventBus.subscribe("chat_message", (data: any) => {
         const { content } = data;
         const { username } = data.sender;
 
         const [cmd, ...args] = content.trim().split(" ");
-        const command = cmd.toLowerCase();
+        const command = resolveCommand(cmd);
+
+        console.log(`command: ${command}`);
 
         switch (command) {
             case Commands.Start:
@@ -23,10 +72,21 @@ export function prepareRPG(): void {
 
             case Commands.Join:
                 if (gameState.status === GamePhase.Lobby) {
-                    const classNameInput = args[0]?.toLowerCase();
+                    let classNameInput = args[0]?.toLowerCase();
+                    if (classNameInput) {
+                        const classFromEmote = resolveClassFromEmote(args[0]);
+                        if (classFromEmote) {
+                            classNameInput = classFromEmote;
+                        }
+                    } else {
+                        const classFromEmote = resolveClassFromEmote(cmd);
+                        if (classFromEmote) {
+                            classNameInput = classFromEmote;
+                        }
+                    }
                     const validClasses = Object.values(ParticipantClasses);
 
-                    if (!validClasses.includes(classNameInput as ParticipantClasses)) {
+                    if (!classNameInput || !validClasses.includes(classNameInput as ParticipantClasses)) {
                         broadcast({ type: "error", message: "Invalid class." });
                         return;
                     }
@@ -39,9 +99,9 @@ export function prepareRPG(): void {
                 handlePlayerLeave(username);
                 break;
 
-            case Commands.Attack:
-            case Commands.Defend:
-            case Commands.Heal:
+            case "attack":
+            case "defend":
+            case "heal":
                 queuePlayerAction(username, command.substring(1) as ParticipantActions);
                 break;
 
@@ -57,7 +117,7 @@ export function prepareRPG(): void {
                 showHelp();
                 break;
             default:
-                broadcast({ type: "error", message: `Unknown command: ${command}` });
+                broadcast({ type: "error", message: `Unknown command: ${cmd}` });
                 break;
         }
     });
