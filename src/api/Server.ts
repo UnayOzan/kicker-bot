@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import path from "path";
 import gameState from "../game/models/GameState.js";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
@@ -11,7 +12,8 @@ export const startServer = (): void => {
 
   app.use(cors());
   app.use(express.json());
-  app.use(express.static("public"));
+
+  app.use(express.static(path.join(__dirname, "../../public")));
 
   app.get("/players-stream", (_req: Request, res: Response) => {
     res.set({
