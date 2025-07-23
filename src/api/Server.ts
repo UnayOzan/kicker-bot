@@ -62,6 +62,7 @@ export const startServer = (): void => {
   });
 
   app.get("/", (_req, res) => {
+    console.log("WTFFFFFFFFF");
     res.sendFile(path.join(__dirname, "../../public/index.html"));
   });
 
