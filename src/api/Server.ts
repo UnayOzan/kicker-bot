@@ -16,7 +16,6 @@ export const startServer = (): void => {
 
   app.use(cors());
   app.use(express.json());
-
   app.use(express.static(path.join(__dirname, "../../public")));
 
   app.get("/players-stream", (_req: Request, res: Response) => {
